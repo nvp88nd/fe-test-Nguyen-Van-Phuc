@@ -9,7 +9,7 @@ TaskBoard - ứng dụng quản lý công việc nội bộ
 - Redux Toolkit 2 
 - Tailwind CSS 3
 
-## Cai dat
+## Cài đặt
 ```bash
 npm install
 ```
