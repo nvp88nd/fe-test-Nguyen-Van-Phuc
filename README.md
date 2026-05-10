@@ -36,10 +36,10 @@ TaskBoard - ứng dụng quản lý công việc nội bộ
 
 ## Screenshot
 
-> ![Dashboard](./assets/dashboard.png)
-> ![Task List](./assets/task-list.png)
-> ![Filter Task List](./assets/filter-task-list.png)
-> ![Modal Create/Edit](./assets/modal.png)
+> ![Dashboard](./src/assets/dashboard.png)
+> ![Task List](./src/assets/task-list.png)
+> ![Filter Task List](./src/assets/filter-task-list.png)
+> ![Modal Create/Edit](./src/assets/modal.png)
 
 ## Cài đặt
 ```bash
