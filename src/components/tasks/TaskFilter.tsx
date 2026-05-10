@@ -4,6 +4,7 @@ import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '../../store/store';
 import { setFilter, resetFilters } from '../../store/tasksSlice';
+import { useDebounce } from '../../hooks/useDebounce';
 import dayjs from 'dayjs';
 
 const { RangePicker } = DatePicker;
@@ -13,6 +14,11 @@ const TaskFilter: React.FC = () => {
     const filters = useSelector((state: RootState) => state.tasks.filters);
 
     const [searchValue, setSearchValue] = useState(filters.searchText);
+    const debouncedSearch = useDebounce(searchValue, 300);
+
+    useEffect(() => {
+        dispatch(setFilter({ searchText: debouncedSearch }));
+    }, [debouncedSearch, dispatch]);
 
     const handleReset = () => {
         setSearchValue('');

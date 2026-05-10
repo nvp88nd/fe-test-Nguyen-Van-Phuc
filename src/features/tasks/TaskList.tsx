@@ -4,6 +4,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import type { Task } from '../../types/task.type';
 import TaskFilter from '../../components/tasks/TaskFilter';
 import TaskTable from '../../components/tasks/TaskTable';
+import TaskModal from '../../components/tasks/TaskModal';
 
 const TaskList: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -40,6 +41,12 @@ const TaskList: React.FC = () => {
             <TaskFilter />
 
             <TaskTable onEdit={handleOpenEditModal} />
+
+            <TaskModal
+                open={isModalOpen}
+                onClose={handleCloseModal}
+                task={editingTask}
+            />
         </div>
     );
 };
