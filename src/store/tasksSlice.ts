@@ -84,6 +84,38 @@ export const selectAllTasks = createSelector(
     [selectTasksState],
     (tasksState) => tasksState.items
 );
+export const selectFilteredTasks = createSelector(
+    [selectAllTasks, (state: RootState) => state.tasks.filters],
+    (tasks, filters) => {
+        return tasks.filter((task) => {
+            const matchSearch = task.title.toLowerCase().includes(filters.searchText.toLowerCase());
+            const matchStatus = filters.status.length === 0 || filters.status.includes(task.status);
+            const matchPriority = !filters.priority || task.priority === filters.priority;
+
+            let matchDate = true;
+            if (filters.dateRange && task.dueDate) {
+                const taskDate = new Date(task.dueDate).getTime();
+                const startDate = new Date(filters.dateRange[0]).getTime();
+                const endDate = new Date(filters.dateRange[1]).getTime();
+                matchDate = taskDate >= startDate && taskDate <= endDate;
+            }
+
+            return matchSearch && matchStatus && matchPriority && matchDate;
+        });
+    }
+);
+
+export const selectPaginatedTasks = createSelector(
+    [selectFilteredTasks, (state: RootState) => state.tasks.pagination],
+    (filteredTasks, pagination) => {
+        const { currentPage, pageSize } = pagination;
+        const startIndex = (currentPage - 1) * pageSize;
+        return {
+            data: filteredTasks.slice(startIndex, startIndex + pageSize),
+            total: filteredTasks.length,
+        };
+    }
+);
 
 export const selectTaskStats = createSelector(
     [selectAllTasks],
