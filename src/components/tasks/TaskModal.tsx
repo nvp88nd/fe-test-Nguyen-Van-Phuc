@@ -4,14 +4,16 @@ import { useDispatch } from 'react-redux';
 import { addTask, updateTask } from '../../store/tasksSlice';
 import type { Task } from '../../types/task.type';
 import dayjs from 'dayjs';
+import type { MessageInstance } from 'antd/es/message/interface';
 
 interface TaskModalProps {
     open: boolean;
     onClose: () => void;
     task?: Task;
+    messageApi: MessageInstance;
 }
 
-const TaskModal: React.FC<TaskModalProps> = ({ open, onClose, task }) => {
+const TaskModal: React.FC<TaskModalProps> = ({ open, onClose, task, messageApi }) => {
     const [form] = Form.useForm();
     const dispatch = useDispatch();
 
@@ -43,8 +45,10 @@ const TaskModal: React.FC<TaskModalProps> = ({ open, onClose, task }) => {
 
             if (task) {
                 dispatch(updateTask(formattedData));
+                messageApi.success('Cập nhật công việc thành công!');
             } else {
                 dispatch(addTask(formattedData));
+                messageApi.success('Thêm mới công việc thành công!');
             }
 
             onClose();

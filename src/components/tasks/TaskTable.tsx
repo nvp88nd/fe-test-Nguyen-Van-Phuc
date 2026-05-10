@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Table, Tag, Button, Popconfirm, Select, Space } from 'antd';
+import { Table, Tag, Button, Popconfirm, Select, Space, message } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '../../store/store';
@@ -22,10 +22,20 @@ const TaskTable: React.FC<TaskTableProps> = ({ onEdit }) => {
     const pagination = useSelector((state: RootState) => state.tasks.pagination);
 
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+    const [messageApi, contextHolder] = message.useMessage();
 
     const handleBulkDelete = () => {
         dispatch(deleteManyTasks(selectedRowKeys as string[]));
+        messageApi.success(`Đã xóa thành công ${selectedRowKeys.length} công việc!`);
         setSelectedRowKeys([]);
+    };
+    const handleDelete = (id: string) => {
+        dispatch(deleteTask(id));
+        messageApi.success('Đã xóa công việc!');
+    };
+    const handleStatusChange = (id: string, newStatus: Task['status']) => {
+        dispatch(updateTaskStatus({ id, status: newStatus }));
+        messageApi.success('Cập nhật trạng thái thành công!');
     };
 
     const columns = [
@@ -44,7 +54,7 @@ const TaskTable: React.FC<TaskTableProps> = ({ onEdit }) => {
                     <Select
                         value={status}
                         bordered={false}
-                        onChange={(newStatus) => dispatch(updateTaskStatus({ id: record.id, status: newStatus }))}
+                        onChange={(newStatus) => handleStatusChange(record.id, newStatus)}
                         className="w-32"
                         options={[
                             { value: 'todo', label: <Tag>Cần làm</Tag> },
@@ -95,7 +105,7 @@ const TaskTable: React.FC<TaskTableProps> = ({ onEdit }) => {
                     <Popconfirm
                         title="Xóa công việc này?"
                         description="Bạn có chắc chắn muốn xóa không?"
-                        onConfirm={() => dispatch(deleteTask(record.id))}
+                        onConfirm={() => handleDelete(record.id)}
                         okText="Xóa"
                         cancelText="Hủy"
                         okButtonProps={{ danger: true }}
@@ -109,17 +119,26 @@ const TaskTable: React.FC<TaskTableProps> = ({ onEdit }) => {
 
     return (
         <div className="bg-white rounded-lg shadow-sm">
+            {contextHolder}
             <div className="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-lg">
                 <span className="font-medium">
                     Đã chọn: <span className="text-blue-600 font-bold">{selectedRowKeys.length}</span> items
                 </span>
-                <Button
-                    danger
-                    disabled={selectedRowKeys.length === 0}
-                    onClick={handleBulkDelete}
+                <Popconfirm
+                    title="Xóa công việc này?"
+                    description="Bạn có chắc chắn muốn xóa những bản ghi đã chọn không?"
+                    onConfirm={handleBulkDelete}
+                    okText="Xóa"
+                    cancelText="Hủy"
+                    okButtonProps={{ danger: true }}
                 >
-                    Xóa hàng loạt
-                </Button>
+                    <Button
+                        danger
+                        disabled={selectedRowKeys.length === 0}
+                    >
+                        Xóa hàng loạt
+                    </Button>
+                </Popconfirm>
             </div>
 
             <Table

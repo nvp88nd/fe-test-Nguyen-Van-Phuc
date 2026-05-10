@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Input, Select, DatePicker, Button, Space } from 'antd';
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useDispatch, useSelector } from 'react-redux';
@@ -6,15 +6,41 @@ import type { RootState } from '../../store/store';
 import { setFilter, resetFilters } from '../../store/tasksSlice';
 import { useDebounce } from '../../hooks/useDebounce';
 import dayjs from 'dayjs';
+import { useSearchParams } from 'react-router-dom';
 
 const { RangePicker } = DatePicker;
 
 const TaskFilter: React.FC = () => {
     const dispatch = useDispatch();
     const filters = useSelector((state: RootState) => state.tasks.filters);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const isFirstRender = useRef(true);
 
     const [searchValue, setSearchValue] = useState(filters.searchText);
     const debouncedSearch = useDebounce(searchValue, 300);
+
+    useEffect(() => {
+        const searchText = searchParams.get('search') || '';
+        const priority = searchParams.get('priority') || undefined;
+        const status = searchParams.get('status') ? searchParams.get('status')?.split(',') : [];
+
+        dispatch(setFilter({ searchText, priority, status }));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    useEffect(() => {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
+
+        const params = new URLSearchParams();
+        if (filters.searchText) params.set('search', filters.searchText);
+        if (filters.priority) params.set('priority', filters.priority);
+        if (filters.status.length > 0) params.set('status', filters.status.join(','));
+
+        setSearchParams(params, { replace: true });
+    }, [filters, setSearchParams]);
 
     useEffect(() => {
         dispatch(setFilter({ searchText: debouncedSearch }));
@@ -53,7 +79,7 @@ const TaskFilter: React.FC = () => {
                 placeholder="Lọc độ ưu tiên"
                 value={filters.priority || null}
                 onChange={(val) => dispatch(setFilter({ priority: val }))}
-                className="w-40"
+                className="min-w-[180px]"
                 allowClear
                 options={[
                     { label: 'Thấp (Low)', value: 'low' },
@@ -63,6 +89,7 @@ const TaskFilter: React.FC = () => {
             />
 
             <RangePicker
+                placeholder={['Hạn chót từ ngày', 'Đến ngày']}
                 value={filters.dateRange ? [dayjs(filters.dateRange[0]), dayjs(filters.dateRange[1])] : null}
                 onChange={(dates) => {
                     if (dates && dates[0] && dates[1]) {
